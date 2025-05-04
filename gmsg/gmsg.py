@@ -4,8 +4,7 @@ import tempfile
 import subprocess
 from google import genai
 from pathlib import Path
-# from .api_key import get_or_set_api_key
-from api_key import get_or_set_api_key
+from .api_key import get_or_set_api_key
 
 GREEN = "\033[92m"
 RED = "\033[91m"
@@ -35,48 +34,49 @@ def git_diff() -> str | None:
         sys.exit(1)
 
 
-def make_query(diff) -> str:
+def make_query(diff: str) -> str:
     prompt = f"Generate a one liner git commit message for these changes, Below are the changes:\n {diff}"
     return prompt
 
 
-def generate_commit_message(diff: str) -> str:
+def trigger_query(query: str, api_key: str) -> str:
     try:
-        query = make_query(diff)
-        while True:
-            client = genai.Client(api_key=USER_API_KEY)
-            msg = client.models.generate_content(model="gemini-2.0-flash",
-                                                 contents=query)
-
-            print(f"{GREEN}{msg.text}{RESET}")
-            # generated_msg = "feat: Add poetry.lock and pyproject.toml files."
-            # print(generated_msg)
-            if continue_with_this_prompt(msg.text):
-                break
+        client = genai.Client(api_key=api_key)
+        msg = client.models.generate_content(model="gemini-2.0-flash",
+                                             contents=query)
+        return msg.text
     except genai.errors.ClientError as error:
         if error.code == 400:
-            print(
-                dict(
-                    error=f"{RED}Gemini API key not valid, check ~/.gmsg{RESET}"
-                ))
+            printt(dict(error="Gemini API key not valid, check ~/.gmsg"),
+                   is_success=False)
         else:
-            print(error)
+            printt(error, is_success=False)
             sys.exit(1)
 
 
-def continue_with_this_prompt(commit_msg: str) -> bool:
-    action = input("Do you want to continue with this message (Y/e(edit)/n): ")
-    if action in ("", "y", "Y"):
-        print(f"Running: `git commit -m {commit_msg}`")
-        print(
-            f"{GREEN}Message commited to git, to confirm you can run git commit --amend.{RESET}"
-        )
-        commit_message_to_git(commit_msg)
-        return True
-    elif action in ("e", "E"):
-        edit_message_in_editor()
-    elif action in ("n", "N"):
-        return False
+def cycle_through_messages(diff: str, api_key: str) -> bool:
+    query = make_query(diff)
+    msg = trigger_query(query, api_key)
+
+    while True:
+        printt(msg)
+        action = input(
+            "Do you want to continue with this message? [Y = yes / e = edit / n = no]: "
+        ).strip().lower()
+        if action in ("", "y", "Y"):
+            print(
+                f"Running: `git commit -m {msg}`\nMessage committed to git. You can run `git commit --amend` to modify it."
+            )
+
+            commit_message_to_git(msg)
+            break
+        elif action in ("n", "N"):
+            msg = trigger_query(query)
+        elif action in ("e", "E"):
+            msg = edit_message_in_editor(msg)
+
+        else:
+            print("Invalid input. Please enter 'Y', 'e', or 'n'.")
 
 
 def commit_message_to_git(generated_msg: str) -> str | None:
@@ -109,21 +109,26 @@ def edit_message_in_editor(initial_msg: str) -> str:
     return edited_msg
 
 
-def main():
-    global USER_API_KEY
+def printt(text: str, is_success: bool = True):
+    if not is_success:
+        print(RED + text + RESET, file=sys.stderr)
+        return None
+    print(GREEN + text + RESET)
 
-    USER_API_KEY = get_or_set_api_key()
+
+def main():
     try:
         if not is_git_repo():
-            print("Current directory does not have git initialized",
-                  file=sys.stdout)
-            sys.exit(1)
-        diff = git_diff()
-        if not diff:
-            print("There's nothing in git diff.")
+            printt("Not a git repository.", is_success=False)
             sys.exit(1)
 
-        generate_commit_message(diff)
+        diff = git_diff()
+        if not diff:
+            printt("No staged changes found.", is_success=False)
+            sys.exit(1)
+
+        user_api_key = get_or_set_api_key()
+        cycle_through_messages(diff, user_api_key)
 
     except KeyboardInterrupt:
         sys.exit(0)
