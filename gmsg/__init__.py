@@ -1,0 +1,1 @@
+from .gmsg import main

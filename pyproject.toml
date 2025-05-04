@@ -1,0 +1,21 @@
+[project]
+name = "gmsg"
+version = "0.1.1"
+description = "Generates git commit messages for you using AI."
+authors = [
+    {name = "shiyan99s@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "google-genai (>=1.9.0,<2.0.0)"
+]
+
+[project.scripts]
+gmsg = "gmsg.gmsg:main"
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
