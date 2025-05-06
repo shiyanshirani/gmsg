@@ -71,7 +71,7 @@ def cycle_through_messages(diff: str, api_key: str) -> bool:
             commit_message_to_git(msg)
             break
         elif action in ("n", "N"):
-            msg = trigger_query(query)
+            msg = trigger_query(query, api_key)
         elif action in ("e", "E"):
             msg = edit_message_in_editor(msg)
 
