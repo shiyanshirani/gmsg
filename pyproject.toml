@@ -1,6 +1,6 @@
 [project]
 name = "gmsg"
-version = "0.1.4"
+version = "0.1.5"
 description = "Generates git commit messages for you using AI."
 authors = [
     {name = "shiyan99s@gmail.com"}

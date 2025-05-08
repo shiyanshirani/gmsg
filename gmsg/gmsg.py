@@ -118,6 +118,7 @@ def printt(text: str, is_success: bool = True):
 
 def main():
     try:
+        user_api_key = get_or_set_api_key()
         if not is_git_repo():
             printt("Not a git repository.", is_success=False)
             sys.exit(1)
@@ -127,7 +128,6 @@ def main():
             printt("No staged changes found.", is_success=False)
             sys.exit(1)
 
-        user_api_key = get_or_set_api_key()
         cycle_through_messages(diff, user_api_key)
 
     except KeyboardInterrupt:
