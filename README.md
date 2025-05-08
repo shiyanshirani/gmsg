@@ -83,7 +83,6 @@ Message committed to git. You can run `git commit --amend` to modify it.
 ## 🧩 Requirements
 
 * Python 3.10+
-* [Google Generative AI SDK](https://pypi.org/project/google-generativeai/)
 * Git installed and available in your system path
 ---
 
