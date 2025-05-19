@@ -89,6 +89,8 @@ Message committed to git. You can run `git commit --amend` to modify it.
 ## 📍 Roadmap
 
 Here are some upcoming features and improvements planned for this project:
+* [ ] **CLI Arguments Support**
+  Add flags like `--gin` to mention 'git issue number' in the commit.
 
 * [ ] **CLI Arguments Support**
   Add flags like `--dry-run` for non-interactive use.
