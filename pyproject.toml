@@ -1,21 +1,24 @@
-[project]
+[tool.poetry]
 name = "gmsg"
 version = "0.1.5"
 description = "Generates git commit messages for you using AI."
-authors = [
-    {name = "shiyan99s@gmail.com"}
-]
-license = {text = "MIT"}
+authors = ["Shiyan Shirani <shiyan99s@gmail.com>"]
+license = "MIT"
 readme = "README.md"
-requires-python = ">=3.9"
-dependencies = [
-    "google-genai (>=1.9.0,<2.0.0)"
+packages = [{ include = "gmsg" }]
+keywords = ["git", "commit", "ai"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License"
 ]
 
-[project.scripts]
+[tool.poetry.dependencies]
+python = ">=3.9"
+google-genai = ">=1.9.0,<2.0.0"
+
+[tool.poetry.scripts]
 gmsg = "gmsg.gmsg:main"
 
-
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
