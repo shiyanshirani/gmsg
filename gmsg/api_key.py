@@ -9,10 +9,12 @@ def get_or_set_api_key():
     try:
         rc = os.path.join(Path.home(), ".gmsgrc")
         if not os.path.isfile(rc):
-            print("Get your key from https://ai.google.dev/gemini-api/docs/api-key")
+            print(
+                "Get your key from https://ai.google.dev/gemini-api/docs/api-key"
+            )
             key_inp = getpass.getpass("Enter your Gemini API KEY: ").strip()
-            with open(rc, "w") as f:
-                f.write(key_inp)
+            with open(rc, "w") as file:
+                file.write(key_inp)
 
             return key_inp
 

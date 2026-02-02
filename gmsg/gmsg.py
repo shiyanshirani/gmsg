@@ -5,6 +5,7 @@ import subprocess
 from google import genai
 from pathlib import Path
 from .api_key import get_or_set_api_key
+# from api_key import get_or_set_api_key
 
 GREEN = "\033[92m"
 RED = "\033[91m"
@@ -42,15 +43,16 @@ def make_query(diff: str) -> str:
 def trigger_query(query: str, api_key: str) -> str:
     try:
         client = genai.Client(api_key=api_key)
-        msg = client.models.generate_content(model="gemini-2.0-flash",
+        msg = client.models.generate_content(model="gemini-2.5-flash",
                                              contents=query)
-        return msg.text
+        return msg.text.strip()
     except genai.errors.ClientError as error:
         if error.code == 400:
-            printt(dict(error="Gemini API key not valid, check ~/.gmsg"),
+            printt("Gemini API key is invalid, check ~/.gmsg",
                    is_success=False)
+            sys.exit(1)
         else:
-            printt(error, is_success=False)
+            printt(str(error), is_success=False)
             sys.exit(1)
 
 
@@ -59,24 +61,25 @@ def cycle_through_messages(diff: str, api_key: str) -> bool:
     msg = trigger_query(query, api_key)
 
     while True:
-        printt(msg)
+        printt(msg + '\n')
         action = input(
-            "Do you want to continue with this message? [Y = yes / e = edit / n = no]: "
+            "Do you want to continue with this message? c(continue) / e(edit) / r(regenerate) / a(abort): "
         ).strip().lower()
-        if action in ("", "y", "Y"):
+        if action == "c":
             print(
                 f"Running: `git commit -m {msg}`\nMessage committed to git. You can run `git commit --amend` to modify it."
             )
 
             commit_message_to_git(msg)
             break
-        elif action in ("n", "N"):
+        elif action == "r":
             msg = trigger_query(query, api_key)
-        elif action in ("e", "E"):
+        elif action == "e":
             msg = edit_message_in_editor(msg)
-
+        elif action == "a":
+            sys.exit(1)
         else:
-            print("Invalid input. Please enter 'Y', 'e', or 'n'.")
+            print("warning: invalid input")
 
 
 def commit_message_to_git(generated_msg: str) -> str | None:
@@ -120,12 +123,12 @@ def main():
     try:
         user_api_key = get_or_set_api_key()
         if not is_git_repo():
-            printt("Not a git repository.", is_success=False)
+            printt("warning: not a git repository.", is_success=False)
             sys.exit(1)
 
         diff = git_diff()
         if not diff:
-            printt("No staged changes found.", is_success=False)
+            printt("warning: no staged changes found", is_success=False)
             sys.exit(1)
 
         cycle_through_messages(diff, user_api_key)

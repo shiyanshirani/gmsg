@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gmsg"
-version = "0.1.5"
+version = "0.1.7"
 description = "Generates git commit messages for you using AI."
 authors = ["Shiyan Shirani <shiyan99s@gmail.com>"]
 license = "MIT"
@@ -13,8 +13,9 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9"
+python = ">=3.9.5"
 google-genai = ">=1.9.0,<2.0.0"
+cryptography = "^45.0.2"
 
 [tool.poetry.scripts]
 gmsg = "gmsg.gmsg:main"
